@@ -1,0 +1,55 @@
+  public IEnumerable<ModelName> Emergency(double Latitude, double Longitude, double Miles)
+        {
+            List<Model> Modellist = new List<Model>();
+
+            try
+            {
+                using (DBEntities dbcontext = new DBEntities())
+                {
+            
+                    {
+                        var addresses =
+                            from pp in dbcontext.Addresses
+                             where (((SqlFunctions.Acos(SqlFunctions.Sin(SqlFunctions.Radians(Latitude))
+                          * SqlFunctions.Sin(SqlFunctions.Radians(pp.Latitude ?? 0))
+                          + SqlFunctions.Cos(SqlFunctions.Radians(Latitude))
+                          * SqlFunctions.Cos(SqlFunctions.Radians(pp.Latitude ?? 0))
+                          * SqlFunctions.Cos(SqlFunctions.Radians(pp.Longitude ?? 0)
+                          - SqlFunctions.Radians(Longitude))) * 3963.1676) <= Miles)
+                          || (pp.Latitude == Latitude && pp.Longitude == Longitude))
+                            select new
+                            {
+                                pp.Latitude,
+                                pp.Longitude,
+                                pp.StreetAddress1,
+                                pp.StreetAddress2,
+                                pp.ZipCode,
+                                pp.StateName,
+                                pp.CountryCode,
+                                pp.City,
+                                         };
+                        foreach (var item in addresses)
+                        {
+                            Model model = new Model();
+                            model.Latitude = item.Latitude;
+                            model.Longitude = item.Longitude;
+                            model.StreetAddress1 = item.StreetAddress1;
+                            model.StreetAddress2 = item.StreetAddress2;
+                            model.ZipCode = item.ZipCode;
+                            model.City = item.City;
+                            model.StateName = item.StateName;
+                            model.CountryCode = item.CountryCode;
+                              Modellist.Add(model);
+
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return Modellist;
+        }
